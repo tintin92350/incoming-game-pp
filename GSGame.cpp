@@ -5,13 +5,19 @@
 // Math library
 #include <cmath>
 
+// PI
 #define PI 3.14159265359f
+
+
 
 // Game parent (definition)
 #include "Game.hpp"
 
 // Game State - Menu
 #include "GSMenu.hpp"
+
+// Tools - Text
+#include "Text.hpp"
 
 using namespace std;
 
@@ -47,19 +53,23 @@ void GSGame::initialize()
     mWorld_fieldEdge.setSize(sf::Vector2f(4.0f, mWorld_rect.height));
     mWorld_fieldEdge.setPosition(world_position.x + world_size.x / 2.0f - 2.0f, world_position.y);
 
-    mPlayer_graphic.setFillColor(sf::Color(255, 60, 60));
-    mPlayer_graphic.setPosition(0.0f, world_position.y);
-    mPlayer_graphic.setSize(sf::Vector2f(8.0f, 75.0f));
+	mPlayer.create(0.0f, world_position.y, "tintin92350");
+	mAI.create(world_size.x - 8.0f, world_position.y, "Artificial92");
 
-    mAI_graphic = mPlayer_graphic;
-    mAI_graphic.setPosition(800.0f - 8.0f, world_position.y);
+	mPlayersName[0] = sf::Text(mPlayer.name, *mGame->asset_manager.get_font(0));
+	Tools::Text::resetText(&mPlayersName[0]);
+	mPlayersName[0].setPosition(10.0f, 10.0f);
+
+	mPlayersName[1] = sf::Text(mAI.name, *mGame->asset_manager.get_font(0));
+	Tools::Text::resetText(&mPlayersName[1]);
+	mPlayersName[1].setPosition(world_size.x - mPlayersName[1].getLocalBounds().width - 10.0f, 10.0f);
 
     mBall_graphic.setFillColor(sf::Color(60, 255, 60));
     mBall_graphic.setRadius(8.0f);
     mBall_graphic.setOrigin(8.0f, 8.0f);
     mBall_graphic.setPosition(world_position + world_size / 2.0f);
 
-    mBall_velocity = 3.0f;
+    mBall_velocity = 5.0f;
     mBall_angle = 180.0f + 45.0f;
 }
 
@@ -76,11 +86,11 @@ void GSGame::handle_events(const sf::Event &event)
 // Update game content
 void GSGame::update(const sf::Time &time)
 {
-    mPlayer_graphic.setPosition(0.0f, static_cast<float>(mGame->getMousePosition().y));
+    mPlayer.graphic.setPosition(0.0f, static_cast<float>(mGame->getMousePosition().y));
 
     _check_player_position();
 
-    mAI_graphic.setPosition(mAI_graphic.getPosition().x, mPlayer_graphic.getPosition().y);
+    mAI.graphic.setPosition(mAI.graphic.getPosition().x, mPlayer.graphic.getPosition().y);
 
     float radian_angle = mBall_angle * PI / 180.0f;
 
@@ -99,8 +109,11 @@ void GSGame::display()
     mGame->draw(mWorld_edges[1]);
     mGame->draw(mWorld_fieldEdge);
 
-    mGame->draw(mPlayer_graphic);
-    mGame->draw(mAI_graphic);
+	mGame->draw(mPlayersName[0]);
+	mGame->draw(mPlayersName[1]);
+
+    mGame->draw(mPlayer.graphic);
+    mGame->draw(mAI.graphic);
 
     mGame->draw(mBall_graphic);
 }
@@ -108,10 +121,10 @@ void GSGame::display()
 
 void GSGame::_check_player_position()
 {
-    if(mPlayer_graphic.getPosition().y < mWorld_rect.top)
-        mPlayer_graphic.setPosition(0.0f, mWorld_rect.top);
-    else if(mPlayer_graphic.getPosition().y + mPlayer_graphic.getSize().y > mWorld_rect.top + mWorld_rect.height)
-        mPlayer_graphic.setPosition(0.0f, mWorld_rect.top + mWorld_rect.height - mPlayer_graphic.getSize().y);
+    if(mPlayer.graphic.getPosition().y < mWorld_rect.top)
+        mPlayer.graphic.setPosition(0.0f, mWorld_rect.top);
+    else if(mPlayer.graphic.getPosition().y + mPlayer.graphic.getSize().y > mWorld_rect.top + mWorld_rect.height)
+        mPlayer.graphic.setPosition(0.0f, mWorld_rect.top + mWorld_rect.height - mPlayer.graphic.getSize().y);
 }
 
 void GSGame::_check_ball_position()
@@ -127,32 +140,32 @@ void GSGame::_check_ball_position()
         mBall_angle = -mBall_angle;
     }
 
-    if( mBall_graphic.getPosition().y >= mPlayer_graphic.getPosition().y &&
-        mBall_graphic.getPosition().y <= mPlayer_graphic.getPosition().y + mPlayer_graphic.getSize().y)
+    if( mBall_graphic.getPosition().y >= mPlayer.graphic.getPosition().y &&
+        mBall_graphic.getPosition().y <= mPlayer.graphic.getPosition().y + mPlayer.graphic.getSize().y)
     {
-        if(mBall_graphic.getPosition().x - 8.0f < mPlayer_graphic.getPosition().x + mPlayer_graphic.getSize().x)
+        if(mBall_graphic.getPosition().x - 8.0f < mPlayer.graphic.getPosition().x + mPlayer.graphic.getSize().x)
             _divert_ball_players(0);
     }
 
-    if(mBall_graphic.getPosition().y >= mAI_graphic.getPosition().y &&
-            mBall_graphic.getPosition().y <= mAI_graphic.getPosition().y + mAI_graphic.getSize().y)
+    if(mBall_graphic.getPosition().y >= mAI.graphic.getPosition().y &&
+            mBall_graphic.getPosition().y <= mAI.graphic.getPosition().y + mAI.graphic.getSize().y)
     {
-        if(mBall_graphic.getPosition().x + 8.0f > mAI_graphic.getPosition().x)
+        if(mBall_graphic.getPosition().x + 8.0f > mAI.graphic.getPosition().x)
             _divert_ball_players(1);
     }
 }
 
-void GSGame::_divert_ball_players(uint id)
+void GSGame::_divert_ball_players(unsigned int id)
 {
-    float sidesize = mPlayer_graphic.getSize().y / 2.0f;
+    float sidesize = mPlayer.graphic.getSize().y / 2.0f;
     float max_angle = 15.0f;
     float difference = 0.0f;
     float coef = 1.0f;
 
     float player_posy = 0.0f;
 
-    if(id == 0) player_posy = mPlayer_graphic.getPosition().y;
-    else if(id == 1) player_posy = mAI_graphic.getPosition().y;
+    if(id == 0) player_posy = mPlayer.graphic.getPosition().y;
+    else if(id == 1) player_posy = mAI.graphic.getPosition().y;
 
     if(mBall_graphic.getPosition().y <= player_posy + sidesize)
         difference = abs(player_posy - mBall_graphic.getPosition().y);
@@ -163,7 +176,7 @@ void GSGame::_divert_ball_players(uint id)
     mBall_angle = 180.0f + (coef * max_angle) - mBall_angle;
 
     if(id == 0)
-        mBall_graphic.setPosition(mPlayer_graphic.getPosition().x + mPlayer_graphic.getSize().x + 8.0f, mBall_graphic.getPosition().y);
+        mBall_graphic.setPosition(mPlayer.graphic.getPosition().x + mPlayer.graphic.getSize().x + 8.0f, mBall_graphic.getPosition().y);
     else if(id == 1)
-        mBall_graphic.setPosition(mAI_graphic.getPosition().x - 8.0f, mBall_graphic.getPosition().y);
+        mBall_graphic.setPosition(mAI.graphic.getPosition().x - 8.0f, mBall_graphic.getPosition().y);
 }

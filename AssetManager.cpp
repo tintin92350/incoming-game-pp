@@ -2,17 +2,17 @@
 
 using namespace std;
 
-typedef std::map<uint, sf::Font*>::iterator MFONT_IT;
+typedef std::map<unsigned int, sf::Font*>::iterator MFONT_IT;
 
 // Load and create a font
-bool AssetManager::load_font(uint index, std::string _src)
+bool AssetManager::load_font(unsigned int index, std::string _src)
 {
     mFonts[index] = new sf::Font;
     return mFonts[index]->loadFromFile(_src);
 }
 
 // Get font
-sf::Font* AssetManager::get_font(uint index)
+sf::Font* AssetManager::get_font(unsigned int index)
 {
     MFONT_IT font_map;
     if((font_map = mFonts.find(index)) != mFonts.end())
