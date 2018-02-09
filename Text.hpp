@@ -11,12 +11,8 @@ namespace Tools
 {
     namespace Text
     {
-        void centerHorText(sf::Text* _text, const sf::Vector2f _rect, float position_y)
-        {
-            sf::FloatRect bound = _text->getLocalBounds();
-            _text->setOrigin(roundf(bound.left + bound.width / 2.0f), roundf(bound.top));
-            _text->setPosition(roundf(_rect.x + _rect.y / 2.0f), position_y);
-        }
+		void centerHorText(sf::Text* _text, const sf::Vector2f _rect, float position_y);
+		void resetText(sf::Text* _text);
     }
 }
 

@@ -16,10 +16,10 @@ class AssetManager
     public:
 
         // Load and create a font
-        bool load_font(uint index, std::string _src);
+        bool load_font(unsigned int index, std::string _src);
 
         // Get font
-        sf::Font* get_font(uint index);
+        sf::Font* get_font(unsigned int index);
 
         // Clear
         void clear();
@@ -27,7 +27,7 @@ class AssetManager
     private:
 
         // Fonts array
-        std::map<uint, sf::Font*> mFonts;
+        std::map<unsigned int, sf::Font*> mFonts;
 };
 
 #endif

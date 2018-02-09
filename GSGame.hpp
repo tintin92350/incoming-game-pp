@@ -4,6 +4,9 @@
 // Game state parent
 #include "GameState.hpp"
 
+// Player
+#include "Player.hpp"
+
 // Define game state
 // Game state
 class GSGame : public GameState
@@ -29,8 +32,10 @@ class GSGame : public GameState
         sf::RectangleShape  mWorld_grid;
         sf::RectangleShape  mWorld_fieldEdge;
 
-        sf::RectangleShape  mPlayer_graphic;
-        sf::RectangleShape  mAI_graphic;
+		Player				mPlayer;
+		Player				mAI;
+
+		sf::Text			mPlayersName[2];
 
         sf::CircleShape     mBall_graphic;
         sf::Vector2f        mBall_direction;
@@ -39,7 +44,7 @@ class GSGame : public GameState
 
         void _check_player_position();
         void _check_ball_position();
-        void _divert_ball_players(uint id);
+        void _divert_ball_players(unsigned int id);
 
 };
 

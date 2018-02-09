@@ -25,7 +25,7 @@ bool Game::initialize()
 {
     // Context Settings
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 0;
+    settings.antialiasingLevel = 8;
 
     // Create the window
     mWindow.create(sf::VideoMode(800, 600), "INCOMING", sf::Style::Default, settings);
